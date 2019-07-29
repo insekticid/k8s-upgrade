@@ -1,0 +1,13 @@
+version: '2.2'
+
+services:
+    rke:
+        build:
+          context: .
+          args:
+            - VCS_REF="0.1"
+        volumes:
+           #- ./rke:/rke
+           - ./rke/cluster.yml:/rke/cluster.yml
+        #env_file: .env
+        working_dir: /rke
