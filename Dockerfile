@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:0.12.5
+FROM hashicorp/terraform:0.12.6
 
 RUN apk -Uuv add ca-certificates openssl groff less git bash wget make jq curl unzip sed
 
@@ -8,7 +8,7 @@ ENTRYPOINT ["/bin/terraform"]
 
 CMD ["--help"]
 
-ENV TERRAFORM_RKE_VERSION=0.13.0
+ENV TERRAFORM_RKE_VERSION=0.14.0
 ENV RKE_FILENAME=terraform-provider-rke_${TERRAFORM_RKE_VERSION}_linux-amd64.zip
 ENV RKE_TERRAFORM_URL=https://github.com/yamamoto-febc/terraform-provider-rke/releases/download/${TERRAFORM_RKE_VERSION}/${RKE_FILENAME}
 
@@ -21,14 +21,14 @@ RUN wget ${RKE_TERRAFORM_URL}
 RUN unzip ${RKE_FILENAME} -d ~/.terraform.d/plugins/
 RUN rm -f ${RKE_FILENAME}
 
-ENV RKE_VERSION=v0.2.5
+ENV RKE_VERSION=v0.2.7
 RUN wget -q https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64
 RUN chmod +x rke_linux-amd64
 RUN mv rke_linux-amd64 /usr/bin/rke
 
 # Note: Latest version of helm may be found at:
 # https://github.com/kubernetes/helm/releases
-ENV HELM_VERSION="v2.14.2"
+ENV HELM_VERSION="v2.14.3"
 
 RUN wget -q https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/bin/helm \
     && chmod +x /usr/bin/helm
@@ -52,4 +52,4 @@ RUN terraform --version
 ARG VCS_REF
 
 LABEL org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url="https://github.com/insekticid/k8s"
+    org.label-schema.vcs-url="https://github.com/insekticid/k8s-upgrade"
