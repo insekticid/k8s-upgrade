@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:0.12.6
+FROM hashicorp/terraform:0.12.7
 
 RUN apk -Uuv add ca-certificates openssl groff less git bash wget make jq curl unzip sed
 
@@ -8,7 +8,7 @@ ENTRYPOINT ["/bin/terraform"]
 
 CMD ["--help"]
 
-ENV TERRAFORM_RKE_VERSION=0.14.0
+ENV TERRAFORM_RKE_VERSION=0.14.1
 ENV RKE_FILENAME=terraform-provider-rke_${TERRAFORM_RKE_VERSION}_linux-amd64.zip
 ENV RKE_TERRAFORM_URL=https://github.com/yamamoto-febc/terraform-provider-rke/releases/download/${TERRAFORM_RKE_VERSION}/${RKE_FILENAME}
 
@@ -21,7 +21,7 @@ RUN wget ${RKE_TERRAFORM_URL}
 RUN unzip ${RKE_FILENAME} -d ~/.terraform.d/plugins/
 RUN rm -f ${RKE_FILENAME}
 
-ENV RKE_VERSION=v0.2.7
+ENV RKE_VERSION=v0.2.8
 RUN wget -q https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64
 RUN chmod +x rke_linux-amd64
 RUN mv rke_linux-amd64 /usr/bin/rke
