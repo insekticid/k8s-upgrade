@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:0.12.10
+FROM hashicorp/terraform:0.12.12
 
 RUN apk -Uuv add ca-certificates openssl groff less git bash wget make jq curl unzip sed
 
@@ -21,14 +21,14 @@ RUN wget ${RKE_TERRAFORM_URL}
 RUN unzip ${RKE_FILENAME} -d ~/.terraform.d/plugins/
 RUN rm -f ${RKE_FILENAME}
 
-ENV RKE_VERSION=v0.3.1
+ENV RKE_VERSION=v0.3.2
 RUN wget -q https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64
 RUN chmod +x rke_linux-amd64
 RUN mv rke_linux-amd64 /usr/bin/rke
 
 # Note: Latest version of helm may be found at:
 # https://github.com/kubernetes/helm/releases
-ENV HELM_VERSION="v2.14.3"
+ENV HELM_VERSION="v2.15.2"
 
 RUN wget -q https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/bin/helm \
     && chmod +x /usr/bin/helm
