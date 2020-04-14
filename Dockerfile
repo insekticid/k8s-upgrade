@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:0.12.12
+FROM hashicorp/terraform:0.12.24
 
 RUN apk -Uuv add ca-certificates openssl groff less git bash wget make jq curl unzip sed
 
@@ -8,8 +8,10 @@ ENTRYPOINT ["/bin/terraform"]
 
 CMD ["--help"]
 
-ENV TERRAFORM_RKE_VERSION=0.14.1
-ENV RKE_FILENAME=terraform-provider-rke_${TERRAFORM_RKE_VERSION}_linux-amd64.zip
+ENV USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
+
+ENV TERRAFORM_RKE_VERSION=1.0.0-rc5
+ENV RKE_FILENAME=terraform-provider-rke_linux-amd64
 ENV RKE_TERRAFORM_URL=https://github.com/yamamoto-febc/terraform-provider-rke/releases/download/${TERRAFORM_RKE_VERSION}/${RKE_FILENAME}
 
 ENV RKE_TERRAFORM_SHA256SUM=
@@ -17,21 +19,27 @@ ENV RKE_TERRAFORM_SHA256SUM=
 RUN echo "Install Terraform plugin from:" \
   && echo "${RKE_TERRAFORM_URL}"
 RUN mkdir -p ~/.terraform.d/plugins/
-RUN wget ${RKE_TERRAFORM_URL}
-RUN unzip ${RKE_FILENAME} -d ~/.terraform.d/plugins/
-RUN rm -f ${RKE_FILENAME}
+RUN wget -q --user-agent="${USER_AGENT}" ${RKE_TERRAFORM_URL}
+RUN chmod +x ${RKE_FILENAME}
+RUN mv ${RKE_FILENAME} ~/.terraform.d/plugins/
 
-ENV RKE_VERSION=v0.3.2
-RUN wget -q https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64
+ENV RKE_VERSION=v1.0.6
+RUN wget -q --user-agent="${USER_AGENT}" https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64
 RUN chmod +x rke_linux-amd64
 RUN mv rke_linux-amd64 /usr/bin/rke
 
 # Note: Latest version of helm may be found at:
 # https://github.com/kubernetes/helm/releases
-ENV HELM_VERSION="v2.15.2"
+ENV HELM_VERSION="v2.16.5"
 
-RUN wget -q https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/bin/helm \
+RUN wget -q --user-agent="${USER_AGENT}" https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/bin/helm \
     && chmod +x /usr/bin/helm
+
+ENV HELM_VERSION3="v3.1.2"
+
+RUN wget -q --user-agent="${USER_AGENT}" https://get.helm.sh/helm-${HELM_VERSION3}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/bin/helm3 \
+    && chmod +x /usr/bin/helm3
+RUN helm3 plugin install https://github.com/helm/helm-2to3
 
 RUN apk add --no-cache musl-dev go && \
     export PATH=$PATH:$(go env GOPATH)/bin && export GOPATH=$(go env GOPATH) && \
