@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:0.12.25
+FROM hashicorp/terraform:0.12.29
 
 RUN apk -Uuv add ca-certificates openssl groff less git bash wget make jq curl unzip sed
 
@@ -10,32 +10,42 @@ CMD ["--help"]
 
 ENV USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36"
 
-ENV TERRAFORM_RKE_VERSION=1.0.0
-ENV RKE_FILENAME=terraform-provider-rke_linux-amd64
-ENV RKE_TERRAFORM_URL=https://github.com/yamamoto-febc/terraform-provider-rke/releases/download/${TERRAFORM_RKE_VERSION}/${RKE_FILENAME}
-
-ENV RKE_TERRAFORM_SHA256SUM=
+ENV TERRAFORM_RKE_VERSION=1.0.1
+ENV RKE_FILENAME=terraform-provider-rke_${TERRAFORM_RKE_VERSION}_linux_amd64.zip
+ENV RKE_TERRAFORM_URL=https://github.com/rancher/terraform-provider-rke/releases/download/v${TERRAFORM_RKE_VERSION}/${RKE_FILENAME}
 
 RUN echo "Install Terraform plugin from:" \
   && echo "${RKE_TERRAFORM_URL}"
 RUN mkdir -p ~/.terraform.d/plugins/
-RUN wget -q --user-agent="${USER_AGENT}" ${RKE_TERRAFORM_URL}
-RUN chmod +x ${RKE_FILENAME}
-RUN mv ${RKE_FILENAME} ~/.terraform.d/plugins/
+RUN curl -L ${RKE_TERRAFORM_URL} | busybox unzip -
+RUN chmod +x terraform-provider-rke_v${TERRAFORM_RKE_VERSION}
+RUN mv terraform-provider-rke_v${TERRAFORM_RKE_VERSION} ~/.terraform.d/plugins/
 
-ENV RKE_VERSION=v1.0.8
+
+ENV TERRAFORM_HETZNER_DNS_VERSION=1.0.5
+ENV TERRAFORM_HETZNER_DNS_FILENAME=terraform-provider-hetznerdns_${TERRAFORM_HETZNER_DNS_VERSION}_linux_amd64
+ENV TERRAFORM_HETZNER_DNS_URL=https://github.com/timohirt/terraform-provider-hetznerdns/releases/download/v${TERRAFORM_HETZNER_DNS_VERSION}/${TERRAFORM_HETZNER_DNS_FILENAME}.tar.gz
+
+RUN echo "Install Terraform Hetzner DNS plugin from:" \
+  && echo "${TERRAFORM_HETZNER_DNS_URL}"
+RUN mkdir -p ~/.terraform.d/plugins/
+RUN wget -q --user-agent="${USER_AGENT}" ${TERRAFORM_HETZNER_DNS_URL} -O - | tar -xzO terraform-provider-hetznerdns > ~/.terraform.d/plugins/terraform-provider-hetznerdns
+RUN chmod +x ~/.terraform.d/plugins/terraform-provider-hetznerdns
+
+
+ENV RKE_VERSION=v1.1.4
 RUN wget -q --user-agent="${USER_AGENT}" https://github.com/rancher/rke/releases/download/${RKE_VERSION}/rke_linux-amd64
 RUN chmod +x rke_linux-amd64
 RUN mv rke_linux-amd64 /usr/bin/rke
 
 # Note: Latest version of helm may be found at:
 # https://github.com/kubernetes/helm/releases
-ENV HELM_VERSION="v2.16.7"
+ENV HELM_VERSION="v2.16.9"
 
 RUN wget -q --user-agent="${USER_AGENT}" https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/bin/helm \
     && chmod +x /usr/bin/helm
 
-ENV HELM_VERSION3="v3.2.1"
+ENV HELM_VERSION3="v3.2.4"
 
 RUN wget -q --user-agent="${USER_AGENT}" https://get.helm.sh/helm-${HELM_VERSION3}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/bin/helm3 \
     && chmod +x /usr/bin/helm3
